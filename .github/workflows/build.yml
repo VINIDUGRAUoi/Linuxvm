@@ -263,7 +263,7 @@ jobs:
             awk -v p="$1" 'BEGIN{RS="";FS="\n"} $1=="Package: "p {for(i=1;i<=NF;i++) if($i ~ /^Filename: /){sub(/^Filename: /,"",$i); print $i}}' Packages
           }
           mkdir -p work
-          for pkg in proot libtalloc; do
+          for pkg in proot libtalloc libandroid-shmem; do
             f=$(getdeb $pkg | head -n1)
             [ -n "$f" ] || { echo "pacote $pkg nao encontrado"; exit 1; }
             curl -fsSL "$BASE/$f" -o "work/$pkg.deb"
@@ -274,7 +274,7 @@ jobs:
           mkdir -p $J
           cp "$U/bin/proot" $J/libproot.so
           cp "$U/libexec/proot/loader" $J/libproot-loader.so
-          cp -L "$U/lib/libtalloc.so.2" $J/libtalloc.so
+          cp -L "$U/lib/libandroid-shmem.so" $J/libandroid-shmem.so
           patchelf --replace-needed libtalloc.so.2 libtalloc.so $J/libproot.so
           ls -l $J
 
