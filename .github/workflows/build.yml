@@ -255,7 +255,7 @@ jobs:
 
       - name: Baixar proot (Termux) para jniLibs
         run: |
-          set -uo pipefail
+          set -euo pipefail
           sudo apt-get update && sudo apt-get install -y patchelf
           BASE=https://packages.termux.dev/apt/termux-main
           curl -fsSL "$BASE/dists/stable/main/binary-aarch64/Packages" -o Packages
@@ -279,7 +279,7 @@ jobs:
           patchelf --replace-needed libtalloc.so.2 libtalloc.so $J/libproot.so
           patchelf --set-rpath '$ORIGIN' $J/libproot.so
           ls -l $J
-          for f in $J/*.so; do echo "== $f precisa de:"; patchelf --print-needed "$f"; done
+          for f in $J/libproot.so $J/libtalloc.so $J/libandroid-shmem.so; do echo "== $f precisa de:"; patchelf --print-needed "$f" || true; done
 
       - name: Compilar APK
         run: gradle assembleDebug --no-daemon
