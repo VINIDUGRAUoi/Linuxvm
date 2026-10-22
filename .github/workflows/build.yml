@@ -255,7 +255,7 @@ jobs:
 
       - name: Baixar proot (Termux) para jniLibs
         run: |
-          set -euo pipefail
+          set -uo pipefail
           sudo apt-get update && sudo apt-get install -y patchelf
           BASE=https://packages.termux.dev/apt/termux-main
           curl -fsSL "$BASE/dists/stable/main/binary-aarch64/Packages" -o Packages
