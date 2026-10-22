@@ -201,6 +201,12 @@ jobs:
                           val c = URL(url).openConnection() as HttpURLConnection
                           c.instanceFollowRedirects = true
                           c.inputStream.use { i -> tar.outputStream().use { o -> i.copyTo(o) } }
+                          val head = ByteArray(2)
+                          tar.inputStream().use { it.read(head) }
+                          if (head[0] != 0x1f.toByte() || head[1] != 0x8b.toByte()) {
+                              print("Esse link nao e um arquivo .tar.gz de sistema. Nada foi apagado.\n")
+                              tar.delete(); return@Thread
+                          }
                           print("Extraindo...\n")
                           rootfs.deleteRecursively(); rootfs.mkdirs()
                           val p = ProcessBuilder("/system/bin/tar", "-xzf", tar.absolutePath, "-C", rootfs.absolutePath)
@@ -238,7 +244,7 @@ jobs:
                       Thread {
                           p.inputStream.bufferedReader().use { r ->
                               val buf = CharArray(2048); var n: Int
-                              while (r.read(buf).also { n = it } > 0) print(String(buf, 0, n))
+                              try { while (r.read(buf).also { n = it } > 0) print(String(buf, 0, n)) } catch (_: Exception) {}
                           }
                           print("\n[shell encerrado]\n")
                       }.start()
