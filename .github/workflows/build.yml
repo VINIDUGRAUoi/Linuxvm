@@ -274,9 +274,12 @@ jobs:
           mkdir -p $J
           cp "$U/bin/proot" $J/libproot.so
           cp "$U/libexec/proot/loader" $J/libproot-loader.so
+          cp -L "$U/lib/libtalloc.so.2" $J/libtalloc.so
           cp -L "$U/lib/libandroid-shmem.so" $J/libandroid-shmem.so
           patchelf --replace-needed libtalloc.so.2 libtalloc.so $J/libproot.so
+          patchelf --set-rpath '$ORIGIN' $J/libproot.so
           ls -l $J
+          for f in $J/*.so; do echo "== $f precisa de:"; patchelf --print-needed "$f"; done
 
       - name: Compilar APK
         run: gradle assembleDebug --no-daemon
@@ -286,7 +289,7 @@ jobs:
           APK=$(ls app/build/outputs/apk/debug/*.apk | head -n1)
           BT=$(ls -d $ANDROID_HOME/build-tools/* | tail -n1)
           $BT/aapt dump badging "$APK" | grep -E "package:|launchable-activity|sdkVersion|targetSdk" || true
-          unzip -l "$APK" | grep -E "classes.dex|libproot|libtalloc"
+          unzip -l "$APK" | grep -E "classes.dex|libproot|libtalloc|libandroid-shmem"
           unzip -p "$APK" classes.dex | grep -c "MainActivity" || true
 
       - uses: actions/upload-artifact@v4
